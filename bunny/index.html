@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://pixijs.download/release/pixi.js"></script>
+  <title>Bunny</title>
+
+  <style>
+      html {
+          width: 100%;
+          height: 100vh;
+          margin: 0;
+          padding: 0;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          overflow: hidden;
+      }
+
+      * {
+          padding: 0;
+          margin: 0;
+          box-sizing: border-box;
+      }
+  </style>
+</head>
+
+<body>
+<script type="module">
+  import {Application, Assets, Sprite, Graphics, Container, Text} from './pixi.min.mjs';
+
+  (async () => {
+    // Create a new application
+    const app = new Application();
+    await app.init({
+      background: 'gray',
+      width: window.innerWidth,
+      height: window.innerHeight,
+    });
+
+    document.body.appendChild(app.canvas);
+
+    // Load the bunny texture
+    const texture = await Assets.load('https://pixijs.com/assets/bunny.png');
+
+    // Create a new Sprite with the texture
+    const bunny = new Sprite(texture);
+
+    // Center the sprite's anchor point
+    bunny.anchor.set(0.5);
+
+    // Move the sprite to the center of the screen
+    bunny.x = app.screen.width / 2;
+    bunny.y = app.screen.height / 2;
+    //bunny.tint = 0x00FF00
+    //bunny.pivot = {x: 10, y: 15}
+
+    bunny.on('pointerdown', (event)=>console.log(event))
+    bunny.eventMode = 'static'
+
+    console.log('bunny.isInteractive()', bunny.isInteractive())
+
+    app.stage.addChild(bunny);
+
+    // Listen for animate update
+    app.ticker.add(() => {
+      bunny.rotation += 0.1;
+    });
+
+
+    app.stage.addChild(
+      new Graphics()
+        .rect(4, 8, 200, 100)
+        .fill(0xff0000)
+        .stroke({ color: 0xffffff, width: 4, alignment: 0 })
+    );
+
+
+    app.stage.addChild(
+      new Graphics()
+        .svg(
+          `
+          <svg>
+            <path d="M 100 350 q 150 -300 300 0" stroke="blue" />
+          </svg>
+        `
+        )
+    );
+
+    let circleGraphics = new Graphics()
+
+    circleGraphics.context
+      .circle(400, 400, 50)
+      .fill('red')
+
+    app.stage.addChild(circleGraphics)
+
+
+    Assets.add({ alias: 'flowerTop', src: 'https://pixijs.com/assets/flowerTop.png' });
+    Assets.add({ alias: 'eggHead', src: 'https://pixijs.com/assets/eggHead.png' });
+// Load the assets and get a resolved promise once both are loaded
+    const texturesPromise = Assets.load(['flowerTop', 'eggHead']); // => Promise<{flowerTop: Texture, eggHead: Texture}>
+// When the promise resolves, we have the texture!
+    texturesPromise.then((textures) =>
+    {
+      // Create a new Sprite from the resolved loaded Textures
+      const flower = Sprite.from(textures.flowerTop);
+      flower.anchor.set(0.5);
+      flower.x = app.screen.width * 0.25;
+      flower.y = app.screen.height / 2;
+      app.stage.addChild(flower);
+      const egg = Sprite.from(textures.eggHead);
+      egg.anchor.set(0.5);
+      egg.x = app.screen.width * 0.75;
+      egg.y = app.screen.height / 2;
+      app.stage.addChild(egg);
+    });
+
+
+
+    let frame = new Graphics({
+      x:320 - 104,
+      y:180 - 104
+    })
+      .rect(0, 0, 208, 208)
+      .fill(0x666666)
+      .stroke({ color: 0xffffff, width: 4, alignment: 0 })
+
+    app.stage.addChild(frame);
+
+    let mask = new Graphics()
+      // Add the rectangular area to show
+      .rect(0,0, 200, 200)
+      .fill(0xffffff);
+
+    let maskContainer = new Container();
+    maskContainer.mask = mask;
+    maskContainer.addChild(mask);
+    maskContainer.position.set(4,4);
+    frame.addChild(maskContainer);
+
+// Create contents for the masked container
+    let text = new Text({
+      text:'This text will scroll up and be masked, so you can see how masking works.  Lorem ipsum and all that.\n\n' +
+        'You can put anything in the container and it will be masked!',
+      style: {
+        fontSize: 24,
+        fill: 0x1010ff,
+        wordWrap: true,
+        wordWrapWidth: 180
+      },
+      x:10,
+      y:10
+    });
+
+    maskContainer.addChild(text);
+
+  })();
+</script>
+</body>
+
+</html>
